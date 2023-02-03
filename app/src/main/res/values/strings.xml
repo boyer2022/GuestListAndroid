@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Guest List</string>
+    <string name="instructions_placeholder">Enter New Guest Name</string>
+    <string name="add_button_text">Add Guest</string>
+    <string name="Last_guest_message">Last Guest Added: %1$s</string>
+</resources>
