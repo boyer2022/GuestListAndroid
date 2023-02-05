@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import androidx.lifecycle.ViewModelProvider
 
 // Create a constant to be used to store last name stored
     // Key value pairs
@@ -17,11 +18,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var newGuestEditText: EditText
     private lateinit var guestList: TextView
     private lateinit var lastGuestAdded: TextView
+    private lateinit var clearGuestListButton: Button
     // Data structure to store the guests names
         // Mutable List
-    val guestNames = mutableListOf<String>()
+    // val guestNames = mutableListOf<String>()
             // OR
     // val guestName: MutableList<String> = mutableListOf()
+
+    // Calling GuestListViewModel.kt
+    private val guestListViewModel: GuestListViewModel by lazy {
+    // lazy initialization - lambda won't be called until guestListViewModel is used
+        ViewModelProvider(this).get(GuestListViewModel::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,15 +41,29 @@ class MainActivity : AppCompatActivity() {
         guestList = findViewById(R.id.list_of_guests)
         lastGuestAdded = findViewById(R.id.last_guest_added)
 
+        clearGuestListButton = findViewById(R.id.clear_guests_button)
+
         //Event Listener
         addGuestButton.setOnClickListener {
             // Call function
             addNewGuest()
         }
 
+        // Event listener for "Clear" Button
+        clearGuestListButton.setOnClickListener {
+            guestListViewModel.clearGuestList()
+            updateGuestList()
+            // Clears the lastGuestAdded Toast text with empty string
+            lastGuestAdded.text= ""
+        }
+
+
         // Restore the last guest from onSaveInstanceState()
         val savedLastGuestMessage = savedInstanceState?.getString(LAST_GUEST_NAME_KEY)
         lastGuestAdded.text = savedLastGuestMessage
+
+// Fetches sorted data from view model and displays when program is destroyed
+        updateGuestList()
     }
 // First step on saving data
     // New method for Bundle? storing
@@ -60,7 +82,8 @@ class MainActivity : AppCompatActivity() {
         val newGuestName = newGuestEditText.text.toString()
         if (newGuestName.isNotBlank()) {
             // Add to mutable list
-            guestNames.add(newGuestName)
+           // guestNames.add(newGuestName)
+            guestListViewModel.addGuest(newGuestName)
             // Call a new function to add to update list
             updateGuestList()
             // Clear the editText, to ready new name to be added
@@ -74,7 +97,8 @@ class MainActivity : AppCompatActivity() {
     private fun updateGuestList() {
         // Looks up whatever is in guestNames and display that in the guestTextView
             // sorts the guestNames in order - One per line
-        val guestDisplay = guestNames.sorted().joinToString(separator = "\n")
+        val guests = guestListViewModel.getSortedGuestNames()
+        val guestDisplay = guests.joinToString(separator = "\n")
         guestList.text = guestDisplay
     }
 }
